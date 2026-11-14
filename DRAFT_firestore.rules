@@ -1,0 +1,232 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isPasswordAdmin() {
+      return isSignedIn()
+        && request.auth.token.firebase.sign_in_provider == 'password'
+        && request.auth.token.email is string
+        && request.auth.token.email.lower() == 'admin@neiaconcept.com.br';
+    }
+
+    function isBootstrappedGoogleAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email is string
+        && request.auth.token.email.lower() == 'pedronepo097@gmail.com';
+    }
+
+    function isAdmin() {
+      return isPasswordAdmin() || isBootstrappedGoogleAdmin();
+    }
+
+    function isOptionalString(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isOptionalPrice(data, field) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is number && data[field] >= 0 && data[field] <= 1000000);
+    }
+
+    function isValidGallery(data) {
+      return !('galleryImages' in data)
+        || (data.galleryImages is list
+          && data.galleryImages.size() <= 8
+          && (data.galleryImages.size() == 0
+            || (data.galleryImages[0] is string && data.galleryImages[0].size() <= 500)));
+    }
+
+    function isValidStoreSettings(data) {
+      return data.keys().hasAll([
+          'storeName',
+          'heroTitle',
+          'heroSubtitle',
+          'aboutTitle',
+          'aboutText',
+          'address',
+          'updatedAt',
+          'updatedBy'
+        ])
+        && data.keys().hasOnly([
+          'storeName',
+          'logoUrl',
+          'heroTitle',
+          'heroSubtitle',
+          'heroImageUrl',
+          'aboutTitle',
+          'aboutText',
+          'aboutImageUrl',
+          'whatsappNumber',
+          'phone',
+          'address',
+          'openingHours',
+          'instagramUrl',
+          'otherSocialUrl',
+          'hideDemoExamples',
+          'updatedAt',
+          'updatedBy'
+        ])
+        && data.storeName is string && data.storeName.size() >= 1 && data.storeName.size() <= 80
+        && data.heroTitle is string && data.heroTitle.size() >= 1 && data.heroTitle.size() <= 140
+        && data.heroSubtitle is string && data.heroSubtitle.size() <= 400
+        && data.aboutTitle is string && data.aboutTitle.size() >= 1 && data.aboutTitle.size() <= 120
+        && data.aboutText is string && data.aboutText.size() <= 4000
+        && data.address is string && data.address.size() <= 200
+        && isOptionalString(data, 'logoUrl', 500)
+        && isOptionalString(data, 'heroImageUrl', 500)
+        && isOptionalString(data, 'aboutImageUrl', 500)
+        && isOptionalString(data, 'whatsappNumber', 20)
+        && isOptionalString(data, 'phone', 30)
+        && isOptionalString(data, 'openingHours', 200)
+        && isOptionalString(data, 'instagramUrl', 200)
+        && isOptionalString(data, 'otherSocialUrl', 200)
+        && (!('hideDemoExamples' in data) || data.hideDemoExamples is bool)
+        && data.updatedAt == request.time
+        && data.updatedBy == request.auth.uid;
+    }
+
+    function isValidDressPayload(data) {
+      return data.keys().hasAll([
+          'name',
+          'slug',
+          'availability',
+          'status',
+          'createdAt',
+          'updatedAt',
+          'createdBy'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'slug',
+          'category',
+          'description',
+          'details',
+          'currentPrice',
+          'previousPrice',
+          'mainImageUrl',
+          'galleryImages',
+          'availability',
+          'status',
+          'isDemo',
+          'createdAt',
+          'updatedAt',
+          'createdBy'
+        ])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 120
+        && data.slug is string && data.slug.size() >= 2 && data.slug.size() <= 140 && data.slug.matches('^[a-z0-9-]+$')
+        && data.availability in ['available', 'last_units', 'sold_out']
+        && data.status in ['published', 'draft', 'archived']
+        && isOptionalString(data, 'category', 60)
+        && isOptionalString(data, 'description', 2000)
+        && isOptionalString(data, 'details', 1500)
+        && isOptionalPrice(data, 'currentPrice')
+        && isOptionalPrice(data, 'previousPrice')
+        && isOptionalString(data, 'mainImageUrl', 500)
+        && isValidGallery(data)
+        && (!('isDemo' in data) || data.isDemo is bool)
+        && (data.status != 'published' || ('mainImageUrl' in data && data.mainImageUrl is string && data.mainImageUrl.size() > 0));
+    }
+
+    function isValidMediaPayload(data) {
+      return data.keys().hasAll([
+          'dataBase64',
+          'mimeType',
+          'width',
+          'height',
+          'sizeBytes',
+          'createdAt',
+          'createdBy'
+        ])
+        && data.keys().hasOnly([
+          'dataBase64',
+          'mimeType',
+          'width',
+          'height',
+          'sizeBytes',
+          'createdAt',
+          'createdBy'
+        ])
+        && data.dataBase64 is string && data.dataBase64.size() >= 10 && data.dataBase64.size() <= 900000
+        && data.mimeType in ['image/webp', 'image/jpeg', 'image/png']
+        && data.width is number && data.width > 0 && data.width <= 4096
+        && data.height is number && data.height > 0 && data.height <= 4096
+        && data.sizeBytes is number && data.sizeBytes > 0 && data.sizeBytes <= 700000
+        && data.createdAt == request.time
+        && data.createdBy == request.auth.uid;
+    }
+
+    // Store settings: public get on 'store', admin write
+    match /settings/{settingId} {
+      allow get: if settingId == 'store';
+      allow list: if isAdmin();
+      allow create, update: if settingId == 'store' && isAdmin() && isValidStoreSettings(incoming());
+      allow delete: if false;
+    }
+
+    // Dresses catalog: public can read/list ONLY published dresses; admin can read/write all
+    match /dresses/{dressId} {
+      allow get: if isValidId(dressId) && ((resource != null && existing().status == 'published') || isAdmin());
+      allow list: if resource.data.status == 'published' || isAdmin();
+      allow create: if isAdmin()
+        && isValidId(dressId)
+        && isValidDressPayload(incoming())
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(dressId)
+        && isValidDressPayload(incoming())
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'name',
+          'slug',
+          'category',
+          'description',
+          'details',
+          'currentPrice',
+          'previousPrice',
+          'mainImageUrl',
+          'galleryImages',
+          'availability',
+          'status',
+          'isDemo',
+          'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(dressId);
+    }
+
+    // Media assets: public can get by ID for image rendering; only admin can list/upload/delete
+    match /media/{mediaId} {
+      allow get: if isValidId(mediaId);
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidId(mediaId) && isValidMediaPayload(incoming());
+      allow update: if false;
+      allow delete: if isAdmin() && isValidId(mediaId);
+    }
+  }
+}

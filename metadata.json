@@ -1,0 +1,6 @@
+{
+  "name": "Neia Concept",
+  "description": "Boutique feminina especializada em vestidos há 28 anos em Volta Redonda - RJ. Catálogo digital com atendimento personalizado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

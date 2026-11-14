@@ -1,0 +1,232 @@
+{
+  "entities": {
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Configuracoes publicas e institucionais da boutique Neia Concept.",
+      "type": "object",
+      "properties": {
+        "storeName": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Nome oficial da boutique."
+        },
+        "logoUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "URL do logotipo personalizado."
+        },
+        "heroTitle": {
+          "type": "string",
+          "maxLength": 140,
+          "description": "Titulo principal da pagina inicial."
+        },
+        "heroSubtitle": {
+          "type": "string",
+          "maxLength": 400,
+          "description": "Texto de apresentacao da pagina inicial."
+        },
+        "heroImageUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "URL da fotografia principal da boutique."
+        },
+        "aboutTitle": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Titulo da secao institucional."
+        },
+        "aboutText": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Texto institucional sobre os 28 anos da boutique."
+        },
+        "aboutImageUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "URL da fotografia da pagina Sobre."
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Numero de WhatsApp com DDI e DDD (somente digitos)."
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Telefone fixo ou secundario de contato."
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Endereco fisico completo da boutique."
+        },
+        "openingHours": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Horario de funcionamento."
+        },
+        "instagramUrl": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "URL do perfil do Instagram."
+        },
+        "otherSocialUrl": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "URL de outra rede social ou Linktree."
+        },
+        "hideDemoExamples": {
+          "type": "boolean",
+          "description": "Indica se os exemplos iniciais ja foram importados ou ocultados."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data da ultima atualizacao."
+        },
+        "updatedBy": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "UID do administrador que atualizou."
+        }
+      },
+      "required": ["storeName", "heroTitle", "heroSubtitle", "aboutTitle", "aboutText", "address", "updatedAt", "updatedBy"]
+    },
+    "Dress": {
+      "title": "Dress",
+      "description": "Vestido do catalogo da boutique Neia Concept.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Nome do vestido."
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 140,
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Slug amigavel para URL publica."
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Categoria opcional do vestido."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Descricao editorial do vestido."
+        },
+        "details": {
+          "type": "string",
+          "maxLength": 1500,
+          "description": "Caracteristicas e detalhes descritivos livres."
+        },
+        "currentPrice": {
+          "type": "number",
+          "description": "Preco atual em BRL (opcional)."
+        },
+        "previousPrice": {
+          "type": "number",
+          "description": "Preco anterior em promocao real (opcional)."
+        },
+        "mainImageUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "URL da imagem principal."
+        },
+        "galleryImages": {
+          "type": "array",
+          "description": "URLs da galeria adicional de imagens (ate 8 fotos)."
+        },
+        "availability": {
+          "type": "string",
+          "enum": ["available", "last_units", "sold_out"],
+          "description": "Disponibilidade do vestido."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["published", "draft", "archived"],
+          "description": "Status de publicacao."
+        },
+        "isDemo": {
+          "type": "boolean",
+          "description": "Indica se o registro e ilustrativo de demonstracao."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data de criacao."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data da ultima atualizacao."
+        },
+        "createdBy": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "UID do administrador criador."
+        }
+      },
+      "required": ["name", "slug", "availability", "status", "createdAt", "updatedAt", "createdBy"]
+    },
+    "MediaAsset": {
+      "title": "MediaAsset",
+      "description": "Imagem otimizada armazenada de forma persistente no Firestore e servida via /api/media/{id}.",
+      "type": "object",
+      "properties": {
+        "dataBase64": {
+          "type": "string",
+          "maxLength": 900000,
+          "description": "Conteudo binario codificado em base64."
+        },
+        "mimeType": {
+          "type": "string",
+          "enum": ["image/webp", "image/jpeg", "image/png"],
+          "description": "Tipo MIME da imagem."
+        },
+        "width": {
+          "type": "number",
+          "description": "Largura da imagem em pixels."
+        },
+        "height": {
+          "type": "number",
+          "description": "Altura da imagem em pixels."
+        },
+        "sizeBytes": {
+          "type": "number",
+          "description": "Tamanho do arquivo em bytes."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data de upload."
+        },
+        "createdBy": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "UID do administrador que enviou."
+        }
+      },
+      "required": ["dataBase64", "mimeType", "width", "height", "sizeBytes", "createdAt", "createdBy"]
+    }
+  },
+  "firestore": {
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "Configuracoes gerais da loja (documento store)."
+    },
+    "/dresses/{dressId}": {
+      "schema": { "$ref": "#/entities/Dress" },
+      "description": "Catalogo de vestidos da boutique."
+    },
+    "/media/{mediaId}": {
+      "schema": { "$ref": "#/entities/MediaAsset" },
+      "description": "Arquivos de imagem persistentes otimizados."
+    }
+  }
+}
